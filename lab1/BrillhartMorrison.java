@@ -69,4 +69,24 @@ public class BrillhartMorrison {
         }
         return reslt;
     }
+
+    public void generSequence(BigInteger n,int steps) {
+        buildFactorBase(n);
+        BigInteger sq = sqrt(n);
+        BigInteger a0 = sq;
+        BigInteger u = a0;
+        BigInteger v = BigInteger.ONE;
+        BigInteger bMinTwo = BigInteger.ZERO;
+        BigInteger bMinOne= BigInteger.ONE;
+        for (int i = 0; i < steps; i++) {
+            BigInteger nextV = n.subtract(u.multiply(u)).divide(v);
+            BigInteger nextA = sq.add(u).divide(nextV);
+            BigInteger nextU = nextA.multiply(nextV).subtract(u);
+            BigInteger nextB = nextA.multiply(bMinOne).add(bMinTwo);
+            bMinTwo = bMinOne;
+            bMinOne = nextB;
+            u = nextU;
+            v = nextV;
+        }
+    }
 }
