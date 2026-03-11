@@ -3,6 +3,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BrillhartMorrison {
+    private static class FactorRes {
+        boolean smooth;
+        int[] exp;
+        FactorRes(boolean smooth, int[] exp) {
+            this.smooth = smooth;
+            this.exp = exp;
+        }
+    }
     List<Integer> factorBase = new ArrayList<>();
     public void buildFactorBase(BigInteger n) {
         factorBase.clear();
@@ -75,6 +83,24 @@ public class BrillhartMorrison {
         return smtrcX;
     }
 
+    private FactorRes factorOverBase(BigInteger val) {
+        BigInteger cur = val;
+        int[] exp = new int[factorBase.size()];
+        if (cur.signum() < 0) {
+            exp[0] = 1;
+            cur = cur.negate();
+        }
+        for (int i = 1; i < factorBase.size(); i++) {
+            BigInteger p = BigInteger.valueOf(factorBase.get(i));
+            while (cur.mod(p).equals(BigInteger.ZERO)) {
+                exp[i]++;
+                cur = cur.divide(p);
+            }
+        }
+        boolean smooth = cur.equals(BigInteger.ONE);
+        return new FactorRes(smooth, exp);
+    }
+
     public void generSequence(BigInteger n,int steps) {
         buildFactorBase(n);
         BigInteger sq = sqrt(n);
@@ -88,6 +114,18 @@ public class BrillhartMorrison {
             BigInteger nextA = sq.add(u).divide(nextV);
             BigInteger nextU = nextA.multiply(nextV).subtract(u);
             BigInteger nextB = nextA.multiply(bMinOne).add(bMinTwo);
+            BigInteger val = symmetricMod(nextB.multiply(nextB), n);
+            FactorRes fr = factorOverBase(val);
+            if (fr.smooth) {
+                System.out.print("B-smooth: " + val + " = ");
+                for (int j = 0; j < fr.exp.length; j++) {
+                    if (fr.exp[j] > 0) {
+                        System.out.print(factorBase.get(j) + "^" + fr.exp[j] + " ");
+                    }
+                }
+                System.out.println();
+            }
+            System.out.println("b = " + nextB + ", b^2 mod n = " + val);
             bMinTwo = bMinOne;
             bMinOne = nextB;
             u = nextU;
