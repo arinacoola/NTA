@@ -16,9 +16,6 @@ public class BrillhartMorrison {
             if (!isPrime(p)) {
                 continue;
             }
-            if (p == 2) {
-                continue;
-            }
             if (legendre(n, p) == 1) {
                 factorBase.add(p);
             }
@@ -68,6 +65,14 @@ public class BrillhartMorrison {
             }
         }
         return reslt;
+    }
+
+    private BigInteger symmetricMod(BigInteger x, BigInteger n) {
+        BigInteger smtrcX = x.mod(n);
+        if (smtrcX.compareTo(n.divide(BigInteger.TWO)) > 0) {
+            smtrcX = smtrcX.subtract(n);
+        }
+        return smtrcX;
     }
 
     public void generSequence(BigInteger n,int steps) {
