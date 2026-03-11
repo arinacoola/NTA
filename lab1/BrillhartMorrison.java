@@ -5,6 +5,7 @@ import java.util.List;
 public class BrillhartMorrison {
     List<Integer> factorBase = new ArrayList<>();
     public void buildFactorBase(BigInteger n) {
+        factorBase.clear();
         factorBase.add(-1);
         double ln = Math.log(n.doubleValue());
         double lnln = Math.log(ln);
@@ -49,5 +50,23 @@ public class BrillhartMorrison {
             return -1;
         }
         return 0;
+    }
+
+    private BigInteger sqrt(BigInteger n) {
+        BigInteger l = BigInteger.ZERO;
+        BigInteger r = n;
+        BigInteger reslt = BigInteger.ZERO;
+        while (l.compareTo(r) <= 0) {
+            BigInteger mid = l.add(r).divide(BigInteger.TWO);
+            BigInteger sq = mid.multiply(mid);
+            if (sq.compareTo(n) <= 0) {
+                reslt = mid;
+                l = mid.add(BigInteger.ONE);
+            }
+            else {
+                r = mid.subtract(BigInteger.ONE);
+            }
+        }
+        return reslt;
     }
 }
