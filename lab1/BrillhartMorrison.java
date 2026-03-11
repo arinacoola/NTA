@@ -1,5 +1,6 @@
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class BrillhartMorrison {
@@ -11,7 +12,21 @@ public class BrillhartMorrison {
             this.exp = exp;
         }
     }
+
+    private static class SmoothRel{
+        BigInteger b;
+        BigInteger val;
+        int[] exp;
+        SmoothRel(BigInteger b, BigInteger val, int[] exp) {
+            this.b = b;
+            this.val = val;
+            this.exp = exp;
+        }
+    }
+
     List<Integer> factorBase = new ArrayList<>();
+    List<SmoothRel> smoothRels = new ArrayList<>();
+
     public void buildFactorBase(BigInteger n) {
         factorBase.clear();
         factorBase.add(-1);
@@ -42,6 +57,16 @@ public class BrillhartMorrison {
     }
 
     private int legendre(BigInteger n,int p) {
+        if (p == 2) {
+            BigInteger r = n.mod(BigInteger.valueOf(8));
+            if (r.equals(BigInteger.ONE) || r.equals(BigInteger.valueOf(7))) {
+                return 1;
+            }
+            if (r.equals(BigInteger.valueOf(3)) || r.equals(BigInteger.valueOf(5))) {
+                return -1;
+            }
+            return 0;
+        }
         BigInteger mod = BigInteger.valueOf(p);
         BigInteger pow = BigInteger.valueOf((p - 1) / 2);
         BigInteger val = n.mod(mod).modPow(pow, mod);
@@ -101,35 +126,65 @@ public class BrillhartMorrison {
         return new FactorRes(smooth, exp);
     }
 
+    private void saveIfSmooth(BigInteger b, BigInteger val) {
+        FactorRes fr = factorOverBase(val);
+        if (fr.smooth) {
+            smoothRels.add(new SmoothRel(b, val, fr.exp));
+            System.out.print("B-smooth: " + val + " = ");
+            for (int i = 0; i < fr.exp.length; i++) {
+                if (fr.exp[i] > 0) {
+                    System.out.print(factorBase.get(i) + "^" + fr.exp[i] + " ");
+                }
+            }
+            System.out.println();
+        }
+    }
+
     public void generSequence(BigInteger n,int steps) {
         buildFactorBase(n);
+        smoothRels.clear();
         BigInteger sq = sqrt(n);
         BigInteger a0 = sq;
         BigInteger u = a0;
         BigInteger v = BigInteger.ONE;
         BigInteger bMinTwo = BigInteger.ZERO;
         BigInteger bMinOne= BigInteger.ONE;
+        BigInteger b0 = a0;
+        BigInteger val0 = symmetricMod(b0.multiply(b0), n);
+        System.out.println("b0 = " + b0 + ", b0^2 mod n = " + val0);
+        saveIfSmooth(b0, val0);
+        bMinTwo = bMinOne;
+        bMinOne = b0;
         for (int i = 0; i < steps; i++) {
             BigInteger nextV = n.subtract(u.multiply(u)).divide(v);
             BigInteger nextA = sq.add(u).divide(nextV);
             BigInteger nextU = nextA.multiply(nextV).subtract(u);
             BigInteger nextB = nextA.multiply(bMinOne).add(bMinTwo);
             BigInteger val = symmetricMod(nextB.multiply(nextB), n);
-            FactorRes fr = factorOverBase(val);
-            if (fr.smooth) {
-                System.out.print("B-smooth: " + val + " = ");
-                for (int j = 0; j < fr.exp.length; j++) {
-                    if (fr.exp[j] > 0) {
-                        System.out.print(factorBase.get(j) + "^" + fr.exp[j] + " ");
-                    }
-                }
-                System.out.println();
-            }
             System.out.println("b = " + nextB + ", b^2 mod n = " + val);
+            saveIfSmooth(nextB, val);
             bMinTwo = bMinOne;
             bMinOne = nextB;
             u = nextU;
             v = nextV;
         }
     }
+
+
+    public void printFactorBase() {
+        System.out.println("Factor base: " + factorBase);
+    }
+
+    public void printSmoothRelations() {
+        System.out.println("Saved B-smooth relations: " + smoothRels.size());
+        for (int i = 0; i < smoothRels.size(); i++) {
+            SmoothRel rel = smoothRels.get(i);
+            System.out.println("Relation " + i);
+            System.out.println("b = " + rel.b);
+            System.out.println("val = " + rel.val);
+            System.out.println("exp = " + Arrays.toString(rel.exp));
+            System.out.println();
+        }
+    }
 }
+
