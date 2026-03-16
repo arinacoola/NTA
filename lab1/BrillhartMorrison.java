@@ -186,5 +186,90 @@ public class BrillhartMorrison {
             System.out.println();
         }
     }
+
+    private int[] mod2Vector(int[] exp) {
+        int[] v = new int[exp.length];
+        for (int i = 0; i < exp.length; i++) {
+            v[i] = exp[i] & 1;
+        }
+        return v;
+    }
+
+    private boolean isZeroVector(int[] v) {
+        for (int x : v) {
+            if (x != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean sameVector(int[] u, int[] v) {
+        if (u.length != v.length) {
+            return false;
+        }
+        for (int i = 0; i < u.length; i++) {
+            if (u[i] != v[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private int[] findLinearDependencyGauss(List<int[]> vectors) {
+        int rows = vectors.size();
+        int cols = vectors.get(0).length;
+        int[][] matrix = new int[rows][cols + rows];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                matrix[i][j] = vectors.get(i)[j] & 1;
+            }
+            matrix[i][cols + i] = 1;
+        }
+        int curRow = 0;
+        for (int col = 0; col < cols && curRow < rows; col++) {
+            int selectRow = -1;
+            for (int r = curRow; r < rows; r++) {
+                if (matrix[r][col] == 1) {
+                    selectRow = r;
+                    break;
+                }
+            }
+            if (selectRow == -1) {
+                continue;
+            }
+            if (selectRow != curRow) {
+                int[] tmp = matrix[selectRow];
+                matrix[selectRow] = matrix[curRow];
+                matrix[curRow] = tmp;
+            }
+            for (int r = 0; r < rows; r++) {
+                if (r != curRow && matrix[r][col] == 1) {
+                    for (int c = col; c < cols + rows; c++) {
+                        matrix[r][c] ^= matrix[curRow][c];
+                    }
+                }
+            }
+            curRow++;
+        }
+        for (int r = 0; r < rows; r++) {
+            boolean zeroLeft = true;
+            for (int c = 0; c < cols; c++) {
+                if (matrix[r][c] != 0) {
+                    zeroLeft = false;
+                    break;
+                }
+            }
+            if (zeroLeft) {
+                int[] dep = new int[rows];
+                for (int i = 0; i < rows; i++) {
+                    dep[i] = matrix[r][cols + i];
+                }
+                return dep;
+            }
+        }
+        return null;
+    }
+
 }
 
