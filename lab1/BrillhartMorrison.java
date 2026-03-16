@@ -271,5 +271,40 @@ public class BrillhartMorrison {
         return null;
     }
 
+    private BigInteger factor(BigInteger n, int[] dep) {
+        BigInteger X = BigInteger.ONE;
+        int[] totalExp = new int[factorBase.size()];
+        for (int i = 0; i < dep.length; i++) {
+            if (dep[i] == 1) {
+                SmoothRel rel = smoothRels.get(i);
+                X = X.multiply(rel.b).mod(n);
+                for (int j = 0; j < totalExp.length; j++) {
+                    totalExp[j] += rel.exp[j];
+                }
+            }
+        }
+        BigInteger Y = BigInteger.ONE;
+        for (int i = 0; i < totalExp.length; i++) {
+            int gamma = totalExp[i] / 2;
+            if (gamma == 0) {
+                continue;
+            }
+            int base = factorBase.get(i);
+            if (base == -1) {
+                continue;
+            }
+            BigInteger p = BigInteger.valueOf(base);
+            Y = Y.multiply(p.pow(gamma)).mod(n);
+        }
+        BigInteger d1 = X.subtract(Y).abs().gcd(n);
+        if (!d1.equals(BigInteger.ONE) && !d1.equals(n)) {
+            return d1;
+        }
+        BigInteger d2 = X.add(Y).gcd(n);
+        if (!d2.equals(BigInteger.ONE) && !d2.equals(n)) {
+            return d2;
+        }
+        return null;
+    }
 }
 
