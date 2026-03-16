@@ -1,32 +1,40 @@
 import java.math.BigInteger;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 public class CanonicalFactor {
     private final List<BigInteger> result = new ArrayList<>();
-    private LocalDateTime start;
-    private LocalDateTime end;
+    private LocalDateTime algorithmStartTime;
+    private LocalDateTime algorithmEndTime;
     private boolean success;
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS");
 
     public List<BigInteger> findCanonicalFactorization(BigInteger n) {
         result.clear();
         success = false;
-        start = LocalDateTime.now();
-        System.out.println("starting the algorithm: " + start);
+        long totalStartNano = System.nanoTime();
+        algorithmStartTime = LocalDateTime.now();
+        System.out.println("algorithm started at: " + formatTime(algorithmStartTime));
         System.out.println("input number: " + n);
         System.out.println();
         BigInteger cur = n;
         if (n.compareTo(BigInteger.TWO) < 0) {
             System.out.println("factorization is defined for integers greater than 1");
+            algorithmEndTime = LocalDateTime.now();
+            long totalEndNano = System.nanoTime();
+            printAlgorithmFinish(totalStartNano, totalEndNano);
             return new ArrayList<>();
         }
         while (cur.compareTo(BigInteger.ONE) > 0) {
             if (MillerRabin.isPrime(cur, 10)) {
+                LocalDateTime foundTime = LocalDateTime.now();
                 result.add(cur);
                 System.out.println("Miller-Rabin test");
                 System.out.println("number " + cur + " is prime");
+                System.out.println("prime number identified at: " + formatTime(foundTime));
                 System.out.println("add " + cur + " to the result");
                 System.out.println();
                 success = true;
@@ -54,21 +62,22 @@ public class CanonicalFactor {
             break;
         }
         Collections.sort(result);
-        end = LocalDateTime.now();
-        System.out.println("end of algorithm: " + end);
-        System.out.println("duration: " + java.time.Duration.between(start, end));
+        algorithmEndTime = LocalDateTime.now();
+        long totalEndNano = System.nanoTime();
+        printAlgorithmFinish(totalStartNano, totalEndNano);
         return new ArrayList<>(result);
     }
 
     private BigInteger findByTrialDiv(BigInteger n) {
-        LocalDateTime start = LocalDateTime.now();
+        long startNano = System.nanoTime();
         BigInteger divisor = TrialDiv.trialDivision(n);
-        LocalDateTime end = LocalDateTime.now();
+        long endNano = System.nanoTime();
         if (divisor != null) {
+            LocalDateTime foundTime = LocalDateTime.now();
             System.out.println("the method of trial division");
-            System.out.println("start time: " + start);
-            System.out.println("end time: " + end);
             System.out.println("divisor found: " + divisor);
+            System.out.println("found at: " + formatTime(foundTime));
+            System.out.printf("method duration: %.3f ms%n", nanoToMs(endNano - startNano));
             System.out.println("new number n := n / a = " + n.divide(divisor));
             System.out.println();
         }
@@ -76,14 +85,15 @@ public class CanonicalFactor {
     }
 
     private BigInteger findByPollardRho(BigInteger n) {
-        LocalDateTime start = LocalDateTime.now();
+        long startNano = System.nanoTime();
         BigInteger divisor = FloydPollardRho.findDiv(n);
-        LocalDateTime end = LocalDateTime.now();
+        long endNano = System.nanoTime();
         if (divisor != null && !divisor.equals(BigInteger.ONE) && !divisor.equals(n)) {
+            LocalDateTime foundTime = LocalDateTime.now();
             System.out.println("rho-Pollard's method");
-            System.out.println("start time: " + start);
-            System.out.println("end time: " + end);
             System.out.println("divisor found: " + divisor);
+            System.out.println("found at: " + formatTime(foundTime));
+            System.out.printf("method duration: %.3f ms%n", nanoToMs(endNano - startNano));
             System.out.println("new number n := n / a = " + n.divide(divisor));
             System.out.println();
             return divisor;
@@ -93,25 +103,39 @@ public class CanonicalFactor {
 
     private BigInteger findByBM(BigInteger n) {
         BrillhartMorrison bm = new BrillhartMorrison();
-        LocalDateTime start = LocalDateTime.now();
+        long startNano = System.nanoTime();
         BigInteger divisor = bm.findFactor(n, 250);
-        LocalDateTime end = LocalDateTime.now();
+        long endNano = System.nanoTime();
         if (divisor != null && !divisor.equals(BigInteger.ONE) && !divisor.equals(n)) {
+            LocalDateTime foundTime = LocalDateTime.now();
             System.out.println("the Brillhart-Morrison method");
-            System.out.println("start time: " + start);
-            System.out.println("end time: " + end);
             System.out.println("divisor found: " + divisor);
+            System.out.println("found at: " + formatTime(foundTime));
+            System.out.printf("method duration: %.3f ms%n", nanoToMs(endNano - startNano));
             System.out.println("new number n := n / a = " + n.divide(divisor));
             System.out.println();
             return divisor;
         }
-
         return null;
     }
 
     private void  finishWithFail() {
         System.out.println("I can't find the canonical factorization of the number:(");
         System.out.println();
+    }
+
+    private void printAlgorithmFinish(long totalStartNano, long totalEndNano) {
+        System.out.println("algorithm finished at: " + formatTime(algorithmEndTime));
+        System.out.printf("total algorithm duration: %.3f ms%n", nanoToMs(totalEndNano - totalStartNano));
+        System.out.println();
+    }
+
+    private String formatTime(LocalDateTime time) {
+        return time.format(FORMATTER);
+    }
+
+    private double nanoToMs(long nano) {
+        return nano / 1000000.0;
     }
 
     public void printResult() {
