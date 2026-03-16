@@ -8,21 +8,28 @@ public class CanonicalFactor {
     private final List<BigInteger> result = new ArrayList<>();
     private LocalDateTime start;
     private LocalDateTime end;
+    private boolean success;
 
     public List<BigInteger> findCanonicalFactorization(BigInteger n) {
         result.clear();
+        success = false;
         start = LocalDateTime.now();
         System.out.println("starting the algorithm: " + start);
         System.out.println("input number: " + n);
         System.out.println();
         BigInteger cur = n;
-        while (true) {
+        if (n.compareTo(BigInteger.TWO) < 0) {
+            System.out.println("factorization is defined for integers greater than 1");
+            return new ArrayList<>();
+        }
+        while (cur.compareTo(BigInteger.ONE) > 0) {
             if (MillerRabin.isPrime(cur, 10)) {
                 result.add(cur);
                 System.out.println("Miller-Rabin test");
                 System.out.println("number " + cur + " is prime");
                 System.out.println("add " + cur + " to the result");
                 System.out.println();
+                success = true;
                 break;
             }
             BigInteger divisor = findByTrialDiv(cur);
@@ -35,24 +42,7 @@ public class CanonicalFactor {
             if (divisor != null) {
                 result.add(divisor);
                 cur = cur.divide(divisor);
-                if (MillerRabin.isPrime(cur, 10)) {
-                    result.add(cur);
-                    System.out.println("a re-check for simplicity( Miller-Rabin test ) ");
-                    System.out.println("number " + cur + " is prime");
-                    System.out.println("add " + cur + " to the result");
-                    System.out.println();
-                    break;
-                }
-                divisor = findByBM(cur);
-                if (divisor != null) {
-                    result.add(divisor);
-                    cur = cur.divide(divisor);
-                    continue;
-                }
-                else {
-                    finishWithFail();
-                    break;
-                }
+                continue;
             }
             divisor = findByBM(cur);
             if (divisor != null) {
@@ -60,14 +50,13 @@ public class CanonicalFactor {
                 cur = cur.divide(divisor);
                 continue;
             }
-            else {
-                finishWithFail();
-                break;
-            }
+            finishWithFail();
+            break;
         }
         Collections.sort(result);
         end = LocalDateTime.now();
         System.out.println("end of algorithm: " + end);
+        System.out.println("duration: " + java.time.Duration.between(start, end));
         return new ArrayList<>(result);
     }
 
@@ -77,8 +66,8 @@ public class CanonicalFactor {
         LocalDateTime end = LocalDateTime.now();
         if (divisor != null) {
             System.out.println("the method of trial division");
-            System.out.println("beginning: " + start);
-            System.out.println("the end: " + end);
+            System.out.println("start time: " + start);
+            System.out.println("end time: " + end);
             System.out.println("divisor found: " + divisor);
             System.out.println("new number n := n / a = " + n.divide(divisor));
             System.out.println();
@@ -92,8 +81,8 @@ public class CanonicalFactor {
         LocalDateTime end = LocalDateTime.now();
         if (divisor != null && !divisor.equals(BigInteger.ONE) && !divisor.equals(n)) {
             System.out.println("rho-Pollard's method");
-            System.out.println("beginning: " + start);
-            System.out.println("the end: " + end);
+            System.out.println("start time: " + start);
+            System.out.println("end time: " + end);
             System.out.println("divisor found: " + divisor);
             System.out.println("new number n := n / a = " + n.divide(divisor));
             System.out.println();
@@ -108,9 +97,9 @@ public class CanonicalFactor {
         BigInteger divisor = bm.findFactor(n, 250);
         LocalDateTime end = LocalDateTime.now();
         if (divisor != null && !divisor.equals(BigInteger.ONE) && !divisor.equals(n)) {
-            System.out.println("the Brilhart-Morrison method");
-            System.out.println("beginning: " + start);
-            System.out.println("the end: " + end);
+            System.out.println("the Brillhart-Morrison method");
+            System.out.println("start time: " + start);
+            System.out.println("end time: " + end);
             System.out.println("divisor found: " + divisor);
             System.out.println("new number n := n / a = " + n.divide(divisor));
             System.out.println();
@@ -126,7 +115,11 @@ public class CanonicalFactor {
     }
 
     public void printResult() {
-        System.out.println("canonical decomposition:");
+        if (!success) {
+            System.out.println("factorization was not completed");
+            return;
+        }
+        System.out.println("canonical decomposition: ");
         for (int i = 0; i < result.size(); i++) {
             if (i > 0) {
                 System.out.print(" * ");
