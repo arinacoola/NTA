@@ -24,8 +24,8 @@ public class BrillhartMorrison {
         }
     }
 
-    List<Integer> factorBase = new ArrayList<>();
-    List<SmoothRel> smoothRels = new ArrayList<>();
+    private List<Integer> factorBase = new ArrayList<>();
+    private List<SmoothRel> smoothRels = new ArrayList<>();
 
     public void buildFactorBase(BigInteger n) {
         factorBase.clear();
@@ -34,7 +34,7 @@ public class BrillhartMorrison {
         double lnln = Math.log(ln);
         double L = Math.exp(Math.sqrt(ln * lnln));
         double a = 1.0 / Math.sqrt(2);
-        int upBound = (int) Math.pow(L, a);
+        int upBound = Math.max(2,(int) Math.pow(L, a));
         for (int p = 2; p <= upBound; p++) {
             if (!isPrime(p)) {
                 continue;
@@ -129,6 +129,11 @@ public class BrillhartMorrison {
     private void saveIfSmooth(BigInteger b, BigInteger val) {
         FactorRes fr = factorOverBase(val);
         if (fr.smooth) {
+            for (SmoothRel rel : smoothRels) {
+                if (rel.b.equals(b)) {
+                    return;
+                }
+            }
             smoothRels.add(new SmoothRel(b, val, fr.exp));
             System.out.print("B-smooth: " + val + " = ");
             for (int i = 0; i < fr.exp.length; i++) {
@@ -140,7 +145,7 @@ public class BrillhartMorrison {
         }
     }
 
-    public void generSequence(BigInteger n,int steps) {
+    public void generateSequence(BigInteger n,int steps) {
         buildFactorBase(n);
         smoothRels.clear();
         BigInteger sq = sqrt(n);
@@ -283,18 +288,22 @@ public class BrillhartMorrison {
                 }
             }
         }
+        if ((totalExp[0] & 1) != 0) {
+            return null;
+        }
         BigInteger Y = BigInteger.ONE;
-        for (int i = 0; i < totalExp.length; i++) {
+        for (int i = 1; i < totalExp.length; i++) {
             int gamma = totalExp[i] / 2;
             if (gamma == 0) {
                 continue;
             }
-            int base = factorBase.get(i);
-            if (base == -1) {
-                continue;
-            }
-            BigInteger p = BigInteger.valueOf(base);
+            BigInteger p = BigInteger.valueOf(factorBase.get(i));
             Y = Y.multiply(p.pow(gamma)).mod(n);
+        }
+        X = X.mod(n);
+        Y = Y.mod(n);
+        if (X.equals(Y) || X.equals(n.subtract(Y).mod(n))) {
+            return null;
         }
         BigInteger d1 = X.subtract(Y).abs().gcd(n);
         if (!d1.equals(BigInteger.ONE) && !d1.equals(n)) {
@@ -303,6 +312,72 @@ public class BrillhartMorrison {
         BigInteger d2 = X.add(Y).gcd(n);
         if (!d2.equals(BigInteger.ONE) && !d2.equals(n)) {
             return d2;
+        }
+        return null;
+    }
+
+    public BigInteger findFactor(BigInteger n, int steps) {
+        buildFactorBase(n);
+        smoothRels.clear();
+        BigInteger sq = sqrt(n);
+        BigInteger a0 = sq;
+        BigInteger u = a0;
+        BigInteger v = BigInteger.ONE;
+        BigInteger bPrevPrev = BigInteger.ZERO;
+        BigInteger bPrev = BigInteger.ONE;
+        BigInteger b0 = a0;
+        BigInteger val0 = symmetricMod(b0.multiply(b0), n);
+        System.out.println("b0 = " + b0 + ", b0^2 mod n = " + val0);
+        saveIfSmooth(b0, val0);
+        bPrevPrev = bPrev;
+        bPrev = b0;
+        for (int step = 0; step < steps; step++) {
+            BigInteger nextV = n.subtract(u.multiply(u)).divide(v);
+            BigInteger nextA = sq.add(u).divide(nextV);
+            BigInteger nextU = nextA.multiply(nextV).subtract(u);
+            BigInteger nextB = nextA.multiply(bPrev).add(bPrevPrev);
+            BigInteger val = symmetricMod(nextB.multiply(nextB), n);
+            System.out.println("b = " + nextB + ", b^2 mod n = " + val);
+            saveIfSmooth(nextB, val);
+            if (!smoothRels.isEmpty()) {
+                List<int[]> vectors = new ArrayList<>();
+                for (SmoothRel rel : smoothRels) {
+                    vectors.add(mod2Vector(rel.exp));
+                }
+                int last = vectors.size() - 1;
+                if (isZeroVector(vectors.get(last))) {
+                    int[] dependVector = new int[vectors.size()];
+                    dependVector[last] = 1;
+                    BigInteger d = factor(n, dependVector);
+                    if (d != null) {
+                        return d;
+                    }
+                }
+                for (int j = 0; j < last; j++) {
+                    if (sameVector(vectors.get(j), vectors.get(last))) {
+                        int[] dependVector = new int[vectors.size()];
+                        dependVector[j] = 1;
+                        dependVector[last] = 1;
+                        BigInteger d = factor(n, dependVector);
+                        if (d != null) {
+                            return d;
+                        }
+                    }
+                }
+                if (vectors.size() >= factorBase.size()) {
+                    int[] dependVector = findLinearDependencyGauss(vectors);
+                    if (dependVector != null) {
+                        BigInteger d = factor(n, dependVector);
+                        if (d != null) {
+                            return d;
+                        }
+                    }
+                }
+            }
+            bPrevPrev = bPrev;
+            bPrev = nextB;
+            u = nextU;
+            v = nextV;
         }
         return null;
     }
