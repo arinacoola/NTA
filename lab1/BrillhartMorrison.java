@@ -135,13 +135,13 @@ public class BrillhartMorrison {
                 }
             }
             smoothRels.add(new SmoothRel(b, val, fr.exp));
-            System.out.print("B-smooth: " + val + " = ");
+            /*System.out.print("B-smooth: " + val + " = ");
             for (int i = 0; i < fr.exp.length; i++) {
                 if (fr.exp[i] > 0) {
                     System.out.print(factorBase.get(i) + "^" + fr.exp[i] + " ");
                 }
             }
-            System.out.println();
+            System.out.println();*/
         }
     }
 
@@ -156,7 +156,7 @@ public class BrillhartMorrison {
         BigInteger bMinOne= BigInteger.ONE;
         BigInteger b0 = a0;
         BigInteger val0 = symmetricMod(b0.multiply(b0), n);
-        System.out.println("b0 = " + b0 + ", b0^2 mod n = " + val0);
+        //System.out.println("b0 = " + b0 + ", b0^2 mod n = " + val0);
         saveIfSmooth(b0, val0);
         bMinTwo = bMinOne;
         bMinOne = b0;
@@ -166,7 +166,7 @@ public class BrillhartMorrison {
             BigInteger nextU = nextA.multiply(nextV).subtract(u);
             BigInteger nextB = nextA.multiply(bMinOne).add(bMinTwo);
             BigInteger val = symmetricMod(nextB.multiply(nextB), n);
-            System.out.println("b = " + nextB + ", b^2 mod n = " + val);
+            //System.out.println("b = " + nextB + ", b^2 mod n = " + val);
             saveIfSmooth(nextB, val);
             bMinTwo = bMinOne;
             bMinOne = nextB;
@@ -327,7 +327,7 @@ public class BrillhartMorrison {
         BigInteger bPrev = BigInteger.ONE;
         BigInteger b0 = a0;
         BigInteger val0 = symmetricMod(b0.multiply(b0), n);
-        System.out.println("b0 = " + b0 + ", b0^2 mod n = " + val0);
+        //System.out.println("b0 = " + b0 + ", b0^2 mod n = " + val0);
         saveIfSmooth(b0, val0);
         bPrevPrev = bPrev;
         bPrev = b0;
@@ -337,7 +337,7 @@ public class BrillhartMorrison {
             BigInteger nextU = nextA.multiply(nextV).subtract(u);
             BigInteger nextB = nextA.multiply(bPrev).add(bPrevPrev);
             BigInteger val = symmetricMod(nextB.multiply(nextB), n);
-            System.out.println("b = " + nextB + ", b^2 mod n = " + val);
+            //System.out.println("b = " + nextB + ", b^2 mod n = " + val);
             saveIfSmooth(nextB, val);
             if (!smoothRels.isEmpty()) {
                 List<int[]> vectors = new ArrayList<>();

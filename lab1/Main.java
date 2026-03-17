@@ -7,7 +7,6 @@ public class Main {
         CanonicalFactor canonFactor = new CanonicalFactor();
         List<BigInteger> factorization = canonFactor.findCanonicalFactorization(n);
         System.out.println();
-        System.out.println("result as list: " + factorization);
         canonFactor.printResult();
     }
 }
