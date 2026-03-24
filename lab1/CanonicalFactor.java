@@ -50,7 +50,26 @@ public class CanonicalFactor {
             if (divisor != null) {
                 result.add(divisor);
                 cur = cur.divide(divisor);
-                continue;
+                //після знайденого дільника методом Полларда не повертаємось на початок повного циклу, а переходимо до B-M.(на парі цих змін не було)
+                if (MillerRabin.isPrime(cur, 10)) {
+                    LocalDateTime foundTime = LocalDateTime.now();
+                    result.add(cur);
+                    System.out.println("Miller-Rabin test");
+                    System.out.println("number " + cur + " is prime");
+                    System.out.println("prime number identified at: " + formatTime(foundTime));
+                    System.out.println("add " + cur + " to the result");
+                    System.out.println();
+                    success = true;
+                    break;
+                }
+                BigInteger bmDivisor = findByBM(cur);
+                if (bmDivisor != null) {
+                    result.add(bmDivisor);
+                    cur = cur.divide(bmDivisor);
+                    continue;
+                }
+                finishWithFail();
+                break;
             }
             divisor = findByBM(cur);
             if (divisor != null) {
@@ -104,7 +123,7 @@ public class CanonicalFactor {
     private BigInteger findByBM(BigInteger n) {
         BrillhartMorrison bm = new BrillhartMorrison();
         long startNano = System.nanoTime();
-        BigInteger divisor = bm.findFactor(n, 250);
+        BigInteger divisor = bm.findFactor(n, 500);
         long endNano = System.nanoTime();
         if (divisor != null && !divisor.equals(BigInteger.ONE) && !divisor.equals(n)) {
             LocalDateTime foundTime = LocalDateTime.now();

@@ -3,8 +3,8 @@ import java.math.BigInteger;
 public class RhoAndBMresult {
     public static void main(String[] args) {
         BigInteger[] numbers = {
-                new BigInteger("3009182572376191"),
-                new BigInteger("1021514194991569"),
+                new BigInteger("1495056764861639599")
+                /*new BigInteger("1021514194991569"),
                 new BigInteger("4000852962116741"),
                 new BigInteger("15196946347083"),
                 new BigInteger("499664789704823"),
@@ -12,7 +12,7 @@ public class RhoAndBMresult {
                 new BigInteger("679321846483919"),
                 new BigInteger("96267366284849"),
                 new BigInteger("61333127792637"),
-                new BigInteger("2485021628404193")
+                new BigInteger("2485021628404193")*/
         };
         for (BigInteger n : numbers) {
             System.out.println();
