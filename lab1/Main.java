@@ -11,7 +11,7 @@ public class Main {
         try {
             n = new BigInteger(args[0]);
         }
-        catch (NumberFormatException e) {
+        catch (NumberFormatException e){
             System.out.println("input must be an integer");
             return;
         }

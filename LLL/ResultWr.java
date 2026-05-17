@@ -11,4 +11,14 @@ public class ResultWr{
             }
         }
     }
+
+    public void writeSizeSummary(String file, Iterable<SizeSum> res) throws IOException {
+        try (PrintWriter wr = new PrintWriter(new FileWriter(file))) {
+            wr.println("size,delta,average_time_ms,average_swaps");
+            for (SizeSum r : res) {
+                wr.printf("%d,%.2f,%.6f,%.4f%n", r.getSize(), r.getDelta(), r.getAvgTime(), r.getAvgSwaps()
+                );
+            }
+        }
+    }
 }
