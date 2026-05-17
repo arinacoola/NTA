@@ -9,7 +9,7 @@ public class MainLLL {
         double[] deltas = {0.5, 0.75, 0.90, 0.95, 0.99};
         List<DeltaSummary> mainRes = new ArrayList<>();
         for (double delta :deltas) {
-            DeltaSummary summary = experiment.runForDelta(delta, 30,50,-20, 20);
+            DeltaSummary summary = experiment.runForDelta(delta, 30, 50, -20, 20, writer);
             mainRes.add(summary);
         }
         writer.writeSummary("lll.csv",mainRes);

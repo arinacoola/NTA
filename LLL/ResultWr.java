@@ -21,4 +21,26 @@ public class ResultWr{
             }
         }
     }
+
+    public void writeMatrixRes(String file,int matrixId,double delta,double[][] matrix, ReductionStats stats) throws IOException {
+        try (PrintWriter wr = new PrintWriter(new FileWriter(file, true))) {
+            wr.println("matrix_id="+ matrixId);
+            wr.println("delta=" + delta);
+            wr.println("time_ms=" + stats.getExecutionTimeMillis());
+            wr.println("swaps=" + stats.getSwaps());
+            wr.println("hadamard="+stats.getHadamardRatio());
+            wr.println("first_vector_norm=" + stats.getFirstBasisVectorNorm());
+            wr.println("matrix:");
+            for (double[] row :matrix){
+                for (int j=0; j < row.length; j++) {
+                    wr.print((int) row[j]);
+                    if (j + 1< row.length) {
+                        wr.print(" ");
+                    }
+                }
+                wr.println();
+            }
+            wr.println("-----");
+        }
+    }
 }
